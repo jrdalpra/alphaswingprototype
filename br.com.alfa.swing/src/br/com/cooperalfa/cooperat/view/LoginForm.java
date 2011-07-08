@@ -53,7 +53,10 @@ public class LoginForm extends JDialog implements HasBindManager, WindowListener
    @KeyBinding(key = "F5", mask = KeyEvent.CTRL_MASK, method = "consulta")
    private JLabel         lbl_senha;
 
-   @Bindable(source = "login.text.length > 0", property = "enabled")
+   @BindGroup({
+            @Bindable(source = "login.text.length <= 0 ? '' : senha.text", property = "text"),
+            @Bindable(source = "login.text.length > 0", property = "enabled")
+   })
    private JPasswordField senha;
 
    @Property(name = "text", value = "Ok")
