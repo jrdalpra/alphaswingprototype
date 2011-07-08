@@ -1,15 +1,19 @@
 package br.com.cooperalfa.cooperat.view;
 
+import static javax.swing.layout.Layouts.*;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.inject.Inject;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.Panel;
 import javax.swing.annotation.Action;
 import javax.swing.annotation.BindGroup;
 import javax.swing.annotation.Bindable;
@@ -19,8 +23,6 @@ import javax.swing.annotation.Property;
 import javax.swing.bind.BindManager;
 import javax.swing.bind.HasBindManager;
 import javax.swing.validation.impl.BeanValidator;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -35,12 +37,14 @@ import br.com.cooperalfa.model.Usuario;
 @Properties({
          @Property(name = "title", value = "Entrar"),
          @Property(name = "dimension", value = "300,300"),
-         @Property(name = "defaultCloseOperation", value = "DISPOSE_ON_CLOSE")
+         @Property(name = "defaultCloseOperation", value = "DISPOSE_ON_CLOSE"),
+         @Property(name = "resizable", value = "false")
 })
-public class LoginForm extends JDialog implements HasBindManager {
+public class LoginForm extends JDialog implements HasBindManager, WindowListener {
 
    @Property(name = "text", value = "Login")
    private JLabel         lbl_login;
+
    private JTextField     login;
 
    @Property(name = "text", value = "Senha")
@@ -90,25 +94,41 @@ public class LoginForm extends JDialog implements HasBindManager {
 
    @InitUI
    public void primeiroMetodo() {
-      setLayout(new BorderLayout());
-      add(new JPanel() {
-         {
-            setLayout(new MigLayout("center", "[30%][100%]", ""));
-            add(lbl_login, "align right");
-            add(login, "growx, wrap");
-            add(lbl_senha, "align right");
-            add(senha, "growx, wrap");
-            setVisible(true);
-         }
-      }, BorderLayout.CENTER);
-      add(new JPanel() {
-         {
-            setLayout(new MigLayout("center"));
-            add(btn_ok);
-         }
-      }, BorderLayout.SOUTH);
+      border().on(this);
+      add(form(rows(row(lbl_login, login), row(lbl_senha, senha)), Panel.simple()), BorderLayout.CENTER);
+      add(flow().on(Panel.simple()).center().with(btn_ok).getTarget(), BorderLayout.SOUTH);
       setLocationRelativeTo(getOwner());
+      addWindowListener(this);
       setVisible(true);
+   }
+
+   @Override
+   public void windowActivated(WindowEvent e) {
+   }
+
+   @Override
+   public void windowClosed(WindowEvent e) {
+      System.exit(0);
+   }
+
+   @Override
+   public void windowClosing(WindowEvent e) {
+   }
+
+   @Override
+   public void windowDeactivated(WindowEvent e) {
+   }
+
+   @Override
+   public void windowDeiconified(WindowEvent e) {
+   }
+
+   @Override
+   public void windowIconified(WindowEvent e) {
+   }
+
+   @Override
+   public void windowOpened(WindowEvent e) {
    }
 
 }

@@ -1,6 +1,6 @@
 package br;
 
-import static javax.swing.layout.Layouts.border;
+import static javax.swing.layout.Layouts.*;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -119,7 +119,7 @@ public class LoginFormTeste extends JFrame implements ApplicationContextAware, H
    @InitUI
    public void init() {
 
-      setLayout(border());
+      setLayout(border().getLayout());
       add(new JPanel() {
          {
             setLayout(new MigLayout("", "[30%][100%]", ""));

@@ -1,42 +1,37 @@
 package javax.swing.layout;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.LayoutManager;
-import java.util.Arrays;
-import java.util.List;
+import java.awt.Container;
 
-import javax.swing.JLabel;
+import javax.swing.JComponent;
+
+import pagelayout.CellGrid;
 
 public class Layouts {
 
-   public static LayoutManager form(JLabel... labels){
-      return null;
-   }
-   
-   public static FlowLayout flow(){
-      return new FlowLayout(FlowLayout.CENTER);
-   }
-   
-   public static BorderLayout border(){
-      return new BorderLayout();
-   }
-   
-   public static List<Constraint> constraints(Constraint... constraints){
-      return Arrays.asList(constraints);
-   }
-   
-   public static XAxis x(Position position){
-      return new XAxis(position);
-   }
-   
-   public static RowAxis row(Integer row){
-      return null;
+   public static BorderLayoutBuilder border() {
+      return new BorderLayoutBuilder();
    }
 
-   public static ColumnAxis column(Integer row){
-      return null;
+   public static FlowLayoutBuilder flow() {
+      return new FlowLayoutBuilder();
    }
 
-   
+   public static Container form(JComponent[][] rows,
+                                Container target) {
+      CellGrid grid = CellGrid.createCellGrid(rows);
+      grid.createLayout(target);
+      return target;
+   }
+
+   public static PageLayoutBuilder page() {
+      return new PageLayoutBuilder();
+   }
+
+   public static JComponent[] row(JComponent... child) {
+      return child;
+   }
+
+   public static JComponent[][] rows(JComponent[]... components) {
+      return components;
+   }
 }
