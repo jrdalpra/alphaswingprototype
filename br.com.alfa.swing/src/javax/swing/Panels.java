@@ -1,6 +1,14 @@
 package javax.swing;
 
-public class Panel {
+import java.awt.Component;
+
+public class Panels {
+
+   public static JScrollPane scroll(Component view) {
+      JScrollPane result = new JScrollPane(view);
+      result.setBorder(BorderFactory.createEmptyBorder());
+      return result;
+   }
 
    public static JPanel simple() {
       return new JPanel();

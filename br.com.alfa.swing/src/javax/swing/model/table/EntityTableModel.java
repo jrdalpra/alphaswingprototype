@@ -47,17 +47,19 @@ public class EntityTableModel implements TableModel {
 
    @Override
    public int getRowCount() {
-      return 10;
+      return 1000;
    }
 
    @Override
-   public Object getValueAt(int rowIndex, int columnIndex) {
-      return "teste";
+   public Object getValueAt(int rowIndex,
+                            int columnIndex) {
+      return columnIndex == 2 ? false : "teste";
    }
 
    @Override
-   public boolean isCellEditable(int rowIndex, int columnIndex) {
-      return false;
+   public boolean isCellEditable(int rowIndex,
+                                 int columnIndex) {
+      return true;
    }
 
    @Override
@@ -65,7 +67,10 @@ public class EntityTableModel implements TableModel {
    }
 
    @Override
-   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+   public void setValueAt(Object aValue,
+                          int rowIndex,
+                          int columnIndex) {
+      System.out.println(aValue);
    }
 
 }

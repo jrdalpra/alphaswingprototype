@@ -1,5 +1,7 @@
 package javax.swing.bind;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
@@ -14,7 +16,8 @@ import javax.swing.script.MirrorPropertyAccessor;
 
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-public class BindManager implements ChangeListener, DocumentListener, WindowListener, WindowFocusListener {
+public class BindManager implements ChangeListener, DocumentListener, WindowListener, WindowFocusListener,
+         ActionListener {
 
    private List<Binder>              binders = new ArrayList<Binder>();
    private Object                    root;
@@ -27,6 +30,11 @@ public class BindManager implements ChangeListener, DocumentListener, WindowList
       context.addPropertyAccessor(new MirrorPropertyAccessor());
    }
 
+   @Override
+   public void actionPerformed(ActionEvent e) {
+      apply(e);
+   }
+
    public boolean add(Binder e) {
       return binders.add(e.context(context));
    }
@@ -37,7 +45,7 @@ public class BindManager implements ChangeListener, DocumentListener, WindowList
          public void run() {
             synchronized (lock) {
                for (Binder binder : getBinders()) {
-                  binder.apply(event);
+                  binder.apply(root, event);
                }
             }
          }

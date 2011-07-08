@@ -79,7 +79,8 @@ public class MainMenu extends JFrame implements WindowFocusListener, HasBindMana
    }
 
    public void clicar(ActionEvent event) {
-      spring.getBean(PaisForm.class);
+      sessao.sair();
+      verificaLogin();
    }
 
    @Override

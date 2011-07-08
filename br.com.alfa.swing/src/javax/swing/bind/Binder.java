@@ -20,20 +20,20 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class Binder {
 
-   private List<Bindable>            bindables;
-   private SpelExpressionParser      parser;
+   private List<Bindable>              bindables;
+   private static SpelExpressionParser parser            = new SpelExpressionParser();
 
-   private Map<Bindable, Expression> expressions       = new HashMap<Bindable, Expression>();
-   private Map<Bindable, Expression> targetExpressions = new HashMap<Bindable, Expression>();
-   private InvocationHandler<Object> _target;
-   private EvaluationContext         context;
-   private Object                    target;
+   private Map<Bindable, Expression>   expressions       = new HashMap<Bindable, Expression>();
+   private Map<Bindable, Expression>   targetExpressions = new HashMap<Bindable, Expression>();
+   private InvocationHandler<Object>   _target;
+   private EvaluationContext           context;
+   private Object                      target;
 
    public Binder() {
-      parser = new SpelExpressionParser();
    }
 
-   public void apply(Object event) {
+   public void apply(Object root,
+                     Object event) {
       Object _old = null, _new = null;
       if (isSource(event)) {
          return;

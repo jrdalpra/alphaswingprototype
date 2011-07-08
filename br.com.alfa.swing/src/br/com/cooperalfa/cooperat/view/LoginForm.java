@@ -4,6 +4,7 @@ import static javax.swing.layout.Layouts.*;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -13,11 +14,12 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.Panel;
+import javax.swing.Panels;
 import javax.swing.annotation.Action;
 import javax.swing.annotation.BindGroup;
 import javax.swing.annotation.Bindable;
 import javax.swing.annotation.InitUI;
+import javax.swing.annotation.KeyBinding;
 import javax.swing.annotation.Properties;
 import javax.swing.annotation.Property;
 import javax.swing.bind.BindManager;
@@ -48,6 +50,7 @@ public class LoginForm extends JDialog implements HasBindManager, WindowListener
    private JTextField     login;
 
    @Property(name = "text", value = "Senha")
+   @KeyBinding(key = "F5", mask = KeyEvent.CTRL_MASK, method = "consulta")
    private JLabel         lbl_senha;
 
    @Bindable(source = "login.text.length > 0", property = "enabled")
@@ -95,10 +98,11 @@ public class LoginForm extends JDialog implements HasBindManager, WindowListener
    @InitUI
    public void primeiroMetodo() {
       border().on(this);
-      add(form(rows(row(lbl_login, login), row(lbl_senha, senha)), Panel.simple()), BorderLayout.CENTER);
-      add(flow().on(Panel.simple()).center().with(btn_ok).getTarget(), BorderLayout.SOUTH);
+      add(form(rows(row(lbl_login, login), row(lbl_senha, senha)), Panels.simple()), BorderLayout.CENTER);
+      add(flow().on(Panels.simple()).center().with(btn_ok).getTarget(), BorderLayout.SOUTH);
       setLocationRelativeTo(getOwner());
       addWindowListener(this);
+      login.setDragEnabled(true);
       setVisible(true);
    }
 

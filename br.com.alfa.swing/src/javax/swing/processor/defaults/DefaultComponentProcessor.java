@@ -9,8 +9,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.JButton;
 import javax.swing.JTree;
@@ -52,8 +55,31 @@ import br.com.cooperalfa.swing.binding.BindingProxy;
 public class DefaultComponentProcessor implements ComponentProcessor, ApplicationContextAware, PropertyChangeListener,
          ChangeListener {
 
+   public static class PropertyAnnotationComparator implements Comparator<Property> {
+      @Override
+      public int compare(Property o1,
+                         Property o2) {
+         return o1.name().compareTo(o2.name());
+      }
+   }
+
+   public static Set<Property> createPropertySet(Collection<Property> collection) {
+      return createSet(collection, new PropertyAnnotationComparator());
+   }
+
+   public static <T> Set<T> createSet(Collection<T> collection,
+                                      Comparator<T> comparator) {
+      Set<T> result = new TreeSet<T>(comparator);
+      if (collection != null) {
+         result.addAll(collection);
+      }
+      return result;
+   }
+
    private PropertyProcessor  propertyProcessor;
+
    private ApplicationContext spring;
+
    List<String>               methods = new ArrayList<String>();
 
    {
@@ -82,11 +108,12 @@ public class DefaultComponentProcessor implements ComponentProcessor, Applicatio
       return apply(component, null);
    }
 
-   public <C> C apply(C component, Object parent) {
+   public <C> C apply(C component,
+                      Object parent) {
       if (component == null) {
          return null;
       }
-      List<Property> properties = propertiesOf(component.getClass());
+      Set<Property> properties = propertiesOf(component.getClass());
       for (Property property : properties) {
          propertyProcessor().process(property, component);
       }
@@ -106,7 +133,9 @@ public class DefaultComponentProcessor implements ComponentProcessor, Applicatio
       return component;
    }
 
-   private <C> void applyActionsFor(Object child, final Field field, final C parent) {
+   private <C> void applyActionsFor(Object child,
+                                    final Field field,
+                                    final C parent) {
       // TODO ações padrões (CoC)
       if (child instanceof JButton) {
          ((JButton) child).addActionListener(new ActionListener() {
@@ -115,6 +144,9 @@ public class DefaultComponentProcessor implements ComponentProcessor, Applicatio
                new Mirror().on(parent).invoke().method(field.getAnnotation(Action.class).method()).withArgs(e);
             }
          });
+         if (HasBindManager.class.isInstance(parent)) {
+            ((JButton) child).addActionListener(HasBindManager.class.cast(parent).getBindingManager());
+         }
       }
       if (child instanceof JTree) {
          JTree.class.cast(child).addTreeSelectionListener(new TreeSelectionListener() {
@@ -126,7 +158,8 @@ public class DefaultComponentProcessor implements ComponentProcessor, Applicatio
       }
    }
 
-   private void applyListenersTo(Object source, BindManager manager) {
+   private void applyListenersTo(Object source,
+                                 BindManager manager) {
       if (JTextComponent.class.isInstance(source)) {
          ((JTextComponent) source).getDocument().putProperty("source", source);
          ((JTextComponent) source).getDocument().addDocumentListener(manager);
@@ -139,7 +172,9 @@ public class DefaultComponentProcessor implements ComponentProcessor, Applicatio
       }
    }
 
-   private <C> void bind(final C sourceComponent, final Field sourceField, final Object parent) {
+   private <C> void bind(final C sourceComponent,
+                         final Field sourceField,
+                         final Object parent) {
       if (sourceComponent == null || parent == null) {
          return;
       }
@@ -225,14 +260,16 @@ public class DefaultComponentProcessor implements ComponentProcessor, Applicatio
       return result;
    }
 
-   private <C> Object child(Field field, C parent) {
+   @SuppressWarnings("unused")
+   private <C> Object child(Field field,
+                            C parent) {
       try {
          boolean springCandidate = false; // isSpringCandidate(field.getType());
          Object child = springCandidate ? spring.getBean(field.getType()) : (field.getType().isAnnotationPresent(
                   Bindable.class)
-                  || field.isAnnotationPresent(Bindable.class) ? BindingProxy.bindable(field.getType()) : field
-                  .getType().newInstance());
-         List<Property> properties = propertiesOfField(field);
+                  || field.isAnnotationPresent(Bindable.class) ? BindingProxy.bindable(field.getType())
+                  : field.getType().newInstance());
+         Set<Property> properties = propertiesOfField(field);
          properties.addAll(propertiesOf(field.getType()));
          if (!springCandidate) {
             for (Property property : properties) {
@@ -321,47 +358,54 @@ public class DefaultComponentProcessor implements ComponentProcessor, Applicatio
                || method.isAnnotationPresent(BindGroup.class);
    }
 
-   public void process(final Object parent, final Field current, final Bindable bind, final ExpressionParser parser,
-            final EvaluationContext context) {
+   public void process(final Object parent,
+                       final Field current,
+                       final Bindable bind,
+                       final ExpressionParser parser,
+                       final EvaluationContext context) {
       Expression expression = parser.parseExpression(bind.source());
       Object value = expression.getValue(context);
       if (value != null) {
          new Mirror().on(new Mirror().on(parent).get().field(current)).invoke().setterFor(bind.property())
-                  .withValue(value);
+                     .withValue(value);
       }
    }
 
-   protected <C> List<Property> propertiesOf(Class<C> componentClass) {
+   protected <C> Set<Property> propertiesOf(Class<C> componentClass) {
+      if (componentClass == null) {
+         return createPropertySet(null);
+      }
       List<Annotation> retorno = new Mirror().on(componentClass).reflectAll()
-               .annotationsMatching(new AnnotationMatcher(Properties.class));
-      return retorno.size() <= 0 ? propertyOf(componentClass) : Arrays.asList(((Properties) retorno.get(0)).value());
+                                             .annotationsMatching(new AnnotationMatcher(Properties.class));
+      Set<Property> resultado = (retorno.size() <= 0 ? propertyOf(componentClass)
+               : createPropertySet(Arrays.asList(((Properties) retorno.get(0)).value())));
+      resultado.addAll(propertiesOf(componentClass.getSuperclass()));
+      return resultado;
    }
 
-   protected List<Property> propertiesOfField(Field field) {
+   protected Set<Property> propertiesOfField(Field field) {
       List<Annotation> annotations = new Mirror().on(field).reflectAll()
-               .annotationsMatching(new AnnotationMatcher(Properties.class));
-      return annotations.size() <= 0 ? propertyOfField(field) : Arrays
-               .asList(((Properties) annotations.get(0)).value());
+                                                 .annotationsMatching(new AnnotationMatcher(Properties.class));
+      return annotations.size() <= 0 ? propertyOfField(field)
+               : createPropertySet(Arrays.asList(((Properties) annotations.get(0)).value()));
    }
 
    @Override
    public void propertyChange(PropertyChangeEvent evt) {
    }
 
-   @SuppressWarnings({
-      "unchecked"
-   })
-   protected <C> List<Property> propertyOf(C component) {
+   protected <C> Set<Property> propertyOf(C component) {
       List<Annotation> annotations = new Mirror().on(component.getClass()).reflectAll()
-               .annotationsMatching(new AnnotationMatcher(Property.class));
-      return annotations.isEmpty() ? Collections.EMPTY_LIST : Arrays.asList(((Property) annotations.get(0)));
+                                                 .annotationsMatching(new AnnotationMatcher(Property.class));
+      return annotations.isEmpty() ? createPropertySet(null)
+               : createPropertySet(Arrays.asList(((Property) annotations.get(0))));
    }
 
-   @SuppressWarnings("unchecked")
-   protected List<Property> propertyOfField(Field field) {
+   protected Set<Property> propertyOfField(Field field) {
       List<Annotation> annotations = new Mirror().on(field).reflectAll()
-               .annotationsMatching(new AnnotationMatcher(Property.class));
-      return annotations.isEmpty() ? Collections.EMPTY_LIST : Arrays.asList(((Property) annotations.get(0)));
+                                                 .annotationsMatching(new AnnotationMatcher(Property.class));
+      return annotations.isEmpty() ? createPropertySet(null)
+               : createPropertySet(Arrays.asList(((Property) annotations.get(0))));
    }
 
    protected PropertyProcessor propertyProcessor() {
@@ -376,6 +420,10 @@ public class DefaultComponentProcessor implements ComponentProcessor, Applicatio
 
    @Override
    public void stateChanged(ChangeEvent e) {
+
+   }
+
+   public void teste() {
 
    }
 }

@@ -9,7 +9,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.Panel;
+import javax.swing.Panels;
 import javax.swing.annotation.Action;
 import javax.swing.annotation.BindGroup;
 import javax.swing.annotation.Bindable;
@@ -36,24 +36,31 @@ public class PaisForm extends JFrame implements HasBindManager {
 
    private BindManager       manager;
 
+   @BindGroup({
+            @Bindable(property = "nome", source = "txt_nome.text"),
+            @Bindable(property = "id", source = "txt_id.text")
+   })
+   private Pais              pais;
+
    @Property(name = "text", value = "#{tradutor.traduz('pais.id','Código')}")
    private JLabel            lbl_id;
-   private JTextField        id;
+
+   @Bindable(property = "text", source = "pais.id")
+   private JTextField        txt_id;
 
    @Property(name = "text", value = "#{tradutor.traduz('pais.nome','Nome')}")
    private JLabel            lbl_nome;
 
-   private JTextField        nome;
+   @Bindable(property = "text", source = "pais.nome")
+   private JTextField        txt_nome;
 
    @Action(method = "salva")
    @Property(name = "text", value = "#{tradutor.traduz('btn.salvar','Salvar')}")
    private JButton           btn_ok;
 
-   @BindGroup({
-            @Bindable(property = "id", source = "id.text"),
-            @Bindable(property = "nome", source = "nome.text")
-   })
-   private Pais              pais;
+   public PaisForm(Pais pais) {
+      this.pais = pais;
+   }
 
    @Override
    public BindManager getBindingManager() {
@@ -62,8 +69,8 @@ public class PaisForm extends JFrame implements HasBindManager {
 
    public void initUI() {
       border().on(this);
-      add(form(rows(row(lbl_id, id), row(lbl_nome, nome)), Panel.simple()), BorderLayout.CENTER);
-      add(flow().on(Panel.simple()).center().with(btn_ok).getTarget(), BorderLayout.SOUTH);
+      add(form(rows(row(lbl_id, txt_id), row(lbl_nome, txt_nome)), Panels.simple()), BorderLayout.CENTER);
+      add(flow().on(Panels.simple()).center().with(btn_ok).getTarget(), BorderLayout.SOUTH);
       setLocationRelativeTo(null);
       setVisible(true);
    }
@@ -71,6 +78,11 @@ public class PaisForm extends JFrame implements HasBindManager {
    public void salva(ActionEvent event) {
       System.out.println(pais.getId());
       System.out.println(pais.getNome());
+      pais.setNome("asdfasdf");
+   }
+
+   public void setPais(Pais pais) {
+      this.pais = pais;
    }
 
 }

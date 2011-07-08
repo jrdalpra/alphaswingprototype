@@ -13,12 +13,22 @@ public class Pais implements Serializable {
 
    private String            nome;
 
+   private Boolean           ativo;
+
+   public Boolean getAtivo() {
+      return ativo;
+   }
+
    public Long getId() {
       return id;
    }
 
    public String getNome() {
       return nome;
+   }
+
+   public void setAtivo(Boolean ativo) {
+      this.ativo = ativo;
    }
 
    public void setId(Long id) {
