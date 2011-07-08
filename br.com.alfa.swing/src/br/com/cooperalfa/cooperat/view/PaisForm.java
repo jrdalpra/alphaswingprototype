@@ -13,7 +13,6 @@ import javax.swing.Panel;
 import javax.swing.annotation.Action;
 import javax.swing.annotation.BindGroup;
 import javax.swing.annotation.Bindable;
-import javax.swing.annotation.InitUI;
 import javax.swing.annotation.Properties;
 import javax.swing.annotation.Property;
 import javax.swing.bind.BindManager;
@@ -27,7 +26,7 @@ import br.com.cooperalfa.model.Pais;
 @Component
 @Scope("prototype")
 @Properties({
-         @Property(name = "title", value = "Entrar"),
+         @Property(name = "title", value = "#{tradutor.traduz('pais.classe','Pais')}"),
          @Property(name = "dimension", value = "800,600"),
          @Property(name = "defaultCloseOperation", value = "DISPOSE_ON_CLOSE")
 })
@@ -43,6 +42,7 @@ public class PaisForm extends JFrame implements HasBindManager {
 
    @Property(name = "text", value = "#{tradutor.traduz('pais.nome','Nome')}")
    private JLabel            lbl_nome;
+
    private JTextField        nome;
 
    @Action(method = "salva")
@@ -60,7 +60,6 @@ public class PaisForm extends JFrame implements HasBindManager {
       return this.manager == null ? (this.manager = new BindManager(this)) : this.manager;
    }
 
-   @InitUI
    public void initUI() {
       border().on(this);
       add(form(rows(row(lbl_id, id), row(lbl_nome, nome)), Panel.simple()), BorderLayout.CENTER);
@@ -70,6 +69,7 @@ public class PaisForm extends JFrame implements HasBindManager {
    }
 
    public void salva(ActionEvent event) {
+      System.out.println(pais.getId());
       System.out.println(pais.getNome());
    }
 
