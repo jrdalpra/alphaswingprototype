@@ -39,9 +39,15 @@ public class FlowLayoutBuilder implements LayoutBuilder<FlowLayout, FlowLayoutBu
       return this.target != null;
    }
 
+   public FlowLayoutBuilder left() {
+      this.layout.setAlignment(FlowLayout.LEFT);
+      return this;
+   }
+
    @Override
    public FlowLayoutBuilder on(Container target) {
       this.target = target;
+      this.target.setLayout(this.layout);
       return this;
    }
 
