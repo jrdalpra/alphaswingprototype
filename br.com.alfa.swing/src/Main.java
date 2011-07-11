@@ -1,4 +1,3 @@
-
 import javax.swing.SwingUtilities;
 
 import org.springframework.context.ApplicationContext;
@@ -14,7 +13,7 @@ public class Main {
          @Override
          public void run() {
             ApplicationContext spring = new ClassPathXmlApplicationContext("applicationContext.xml");
-            spring.getBean(br.com.cooperalfa.cooperat.view.PaisList.class);
+            spring.getBean(br.com.cooperalfa.cooperat.view.MainMenu.class);
          }
       });
    }

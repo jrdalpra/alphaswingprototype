@@ -10,6 +10,7 @@ import java.awt.event.WindowListener;
 
 import javax.inject.Inject;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
@@ -47,6 +48,7 @@ public class LoginForm extends JDialog implements HasBindManager, WindowListener
    @Property(name = "text", value = "Login")
    private JLabel         lbl_login;
 
+   @Bindable(property = "enabled", source = "checkbox.selected")
    private JTextField     login;
 
    @Property(name = "text", value = "Senha")
@@ -55,7 +57,7 @@ public class LoginForm extends JDialog implements HasBindManager, WindowListener
 
    @BindGroup({
             @Bindable(source = "login.text.length <= 0 ? '' : senha.text", property = "text"),
-            @Bindable(source = "login.text.length > 0", property = "enabled")
+            @Bindable(source = "login.enabled and login.text.length > 0", property = "enabled")
    })
    private JPasswordField senha;
 
@@ -76,6 +78,8 @@ public class LoginForm extends JDialog implements HasBindManager, WindowListener
 
    @Inject
    private Sessao         sessao;
+
+   private JCheckBox      checkbox;
 
    @Autowired
    public LoginForm(MainMenu main) {
@@ -101,7 +105,7 @@ public class LoginForm extends JDialog implements HasBindManager, WindowListener
    @InitUI
    public void primeiroMetodo() {
       border().on(this);
-      add(form(rows(row(lbl_login, login), row(lbl_senha, senha)), Panels.simple()), BorderLayout.CENTER);
+      add(form(rows(row(lbl_login, login), row(lbl_senha, senha), row(checkbox)), Panels.simple()), BorderLayout.CENTER);
       add(flow().on(Panels.simple()).center().with(btn_ok).getTarget(), BorderLayout.SOUTH);
       setLocationRelativeTo(getOwner());
       addWindowListener(this);
